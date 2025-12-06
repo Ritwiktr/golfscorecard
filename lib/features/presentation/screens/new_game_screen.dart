@@ -7,6 +7,7 @@ import '../bloc/game/game_event.dart';
 import '../bloc/player/player_bloc.dart';
 import '../bloc/player/player_state.dart';
 import '../../domain/game.dart';
+import '../../domain/player.dart';
 
 class NewGameScreen extends StatefulWidget {
   const NewGameScreen({super.key});
@@ -62,6 +63,29 @@ class _NewGameScreenState extends State<NewGameScreen> {
     setState(() {
       _scores[playerId]![holeNumber] = score;
     });
+  }
+
+  MapEntry<Player, int>? _getCurrentWinner(List<Player> players) {
+    final totals = <int, int>{};
+    
+    for (final player in players) {
+      if (player.id != null && _selectedPlayers[player.id] == true) {
+        final playerScores = _scores[player.id] ?? {};
+        final total = playerScores.values.fold<int>(0, (sum, score) => sum + score);
+        if (total > 0) { // Only include players with at least one score
+          totals[player.id!] = total;
+        }
+      }
+    }
+    
+    if (totals.isEmpty) return null;
+    
+    final sortedEntries = totals.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value)); // Lower is better in golf
+    
+    final winnerEntry = sortedEntries.first;
+    final winner = players.firstWhere((p) => p.id != null && p.id == winnerEntry.key);
+    return MapEntry(winner, winnerEntry.value);
   }
 
   void _saveGame() {
@@ -361,6 +385,107 @@ class _NewGameScreenState extends State<NewGameScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
+
+                        // Winner display
+                        if (_selectedPlayers.values.any((selected) => selected))
+                          Builder(
+                            builder: (context) {
+                              final winner = _getCurrentWinner(playerState.players);
+                              if (winner != null) {
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: isDark
+                                            ? [
+                                                colorScheme.primary.withOpacity(0.2),
+                                                colorScheme.secondary.withOpacity(0.15),
+                                              ]
+                                            : [
+                                                colorScheme.primary.withOpacity(0.1),
+                                                colorScheme.secondary.withOpacity(0.05),
+                                              ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    padding: const EdgeInsets.all(20),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primaryContainer,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.emoji_events_rounded,
+                                            color: colorScheme.onPrimaryContainer,
+                                            size: 32,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Current Leader',
+                                                style: theme.textTheme.bodySmall?.copyWith(
+                                                  color: colorScheme.onSurface.withOpacity(0.7),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  PlayerAvatar(
+                                                    photoPath: winner.key.photoPath,
+                                                    name: winner.key.name,
+                                                    radius: 20,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Text(
+                                                      winner.key.name,
+                                                      style: theme.textTheme.titleLarge?.copyWith(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: colorScheme.primary,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 6,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: colorScheme.primaryContainer,
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Text(
+                                                      '${winner.value}',
+                                                      style: theme.textTheme.titleMedium?.copyWith(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: colorScheme.onPrimaryContainer,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
 
                         // Score input
                         if (_selectedPlayers.values.any((selected) => selected))

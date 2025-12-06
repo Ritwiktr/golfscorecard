@@ -19,7 +19,7 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    // Enable 16KB page size support
+    // Enable 16KB page size support (Google Play requirement - Nov 2025)
     buildFeatures {
         buildConfig = true
     }
@@ -34,12 +34,13 @@ android {
         applicationId = "com.app.golfscorecard"
         // minSdk 21 = Android 5.0 (Lollipop)
         minSdk = flutter.minSdkVersion
-        // targetSdk 34 = Android 14 (supports 16KB page sizes)
+        // targetSdk 34+ = Android 14+ (supports 16KB page sizes)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         
         // NDK configuration for 16KB page size support
+        // Flutter uses NDK r28+ which supports 16KB pages automatically
         ndk {
             // Support all architectures including devices with 16KB pages
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -48,9 +49,9 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Unsigned AAB - no signing config specified
+            // Note: AABs must be signed before Play Store submission
+            // signingConfig = null
         }
     }
 }

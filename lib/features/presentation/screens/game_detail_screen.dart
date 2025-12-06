@@ -280,6 +280,105 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Winner announcement
+                  if (rankings.isNotEmpty)
+                    Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: isDark
+                                ? [
+                                    colorScheme.primary.withOpacity(0.25),
+                                    colorScheme.secondary.withOpacity(0.2),
+                                  ]
+                                : [
+                                    colorScheme.primary.withOpacity(0.15),
+                                    colorScheme.secondary.withOpacity(0.1),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primaryContainer,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.emoji_events_rounded,
+                                    color: colorScheme.onPrimaryContainer,
+                                    size: 40,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Winner',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: colorScheme.onSurface.withOpacity(0.7),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                PlayerAvatar(
+                                  photoPath: rankings.first.key.photoPath,
+                                  name: rankings.first.key.name,
+                                  radius: 32,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        rankings.first.key.name,
+                                        style: theme.textTheme.headlineSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${rankings.first.value} strokes',
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          color: colorScheme.onSurface.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (rankings.length > 1) ...[
+                              const SizedBox(height: 16),
+                              Divider(color: colorScheme.outline.withOpacity(0.3)),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Runner-up: ${rankings[1].key.name} (${rankings[1].value} strokes)',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+
                   // Rankings card
                   Card(
                     child: Padding(
